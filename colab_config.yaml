@@ -1,0 +1,20 @@
+data:
+  dataset_config: wikitext-2-raw-v1
+  dataset_name: wikitext
+  max_length: 512
+model:
+  hidden_size: 512
+  max_seq_length: 1024
+  name: vaani-small
+  num_heads: 8
+  num_layers: 8
+  vocab_size: 32000
+training:
+  batch_size: 4
+  eval_steps: 500
+  learning_rate: 0.0001
+  logging_dir: /content/drive/MyDrive/Vaani_Models/logs
+  num_epochs: 3
+  output_dir: /content/drive/MyDrive/Vaani_Models
+  save_steps: 1000
+  warmup_steps: 1000
