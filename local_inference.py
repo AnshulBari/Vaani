@@ -60,8 +60,8 @@ def load_model_and_tokenizer():
     
     return model, tokenizer, device
 
-def generate_text(model, tokenizer, prompt, max_length=50, device='cpu'):
-    """Generate text using the trained model"""
+def generate_text(model, tokenizer, prompt, max_length=50, temperature=0.8, top_k=50, device='cpu'):
+    """Generate text using the trained model with improved sampling"""
     model.eval()
     
     # Handle dictionary tokenizer format
@@ -81,22 +81,50 @@ def generate_text(model, tokenizer, prompt, max_length=50, device='cpu'):
     input_ids = torch.tensor(tokens).unsqueeze(0).to(device)
     
     with torch.no_grad():
-        for _ in range(max_length):
+        generated_tokens = []
+        repetition_count = {}  # Track token repetition
+        
+        for step in range(max_length):
             try:
                 outputs = model(input_ids)
                 
-                # Get next token
+                # Get next token logits
                 if outputs.dim() == 3:
                     logits = outputs[0, -1, :]
                 elif outputs.dim() == 2:
                     logits = outputs[-1, :]
                 
-                next_token = torch.argmax(logits).item()
-                input_ids = torch.cat([input_ids, torch.tensor([[next_token]]).to(device)], dim=1)
+                # Apply temperature scaling
+                logits = logits / temperature
                 
-                # Stop if we hit end token
+                # Apply repetition penalty
+                for token_id, count in repetition_count.items():
+                    if count > 2:  # If token appeared more than 2 times
+                        logits[token_id] = logits[token_id] * 0.5  # Reduce probability
+                
+                # Apply top-k filtering
+                if top_k > 0:
+                    top_k_logits, top_k_indices = torch.topk(logits, top_k)
+                    logits[logits < top_k_logits[-1]] = float('-inf')
+                
+                # Sample from the distribution instead of always taking argmax
+                probs = torch.softmax(logits, dim=-1)
+                next_token = torch.multinomial(probs, 1).item()
+                
+                # Update repetition count
+                repetition_count[next_token] = repetition_count.get(next_token, 0) + 1
+                
+                # Stop if we hit end token or period after some content
                 if next_token == word_to_id.get('<eos>', 3):
                     break
+                
+                # Stop if we get too many periods or repetitive tokens
+                if (next_token == word_to_id.get('.', 4) and step > 5 and 
+                    repetition_count.get(word_to_id.get('.', 4), 0) > 3):
+                    break
+                
+                input_ids = torch.cat([input_ids, torch.tensor([[next_token]]).to(device)], dim=1)
+                generated_tokens.append(next_token)
                     
             except Exception as e:
                 print(f"Error: {e}")
@@ -146,10 +174,16 @@ if __name__ == "__main__":
             print(f"Sample words: {list(tokenizer.word2idx.keys())[:10]}")
     
     # Interactive chat
+    print("\n🎯 Generation Settings:")
+    print("- Temperature: 0.8 (creativity)")
+    print("- Top-k: 50 (vocabulary filtering)")
+    print("- Repetition penalty: Enabled")
+    print("- Max length: 30 tokens")
+    
     while True:
         prompt = input("\nEnter prompt (or 'quit' to exit): ")
         if prompt.lower() == 'quit':
             break
             
-        result = generate_text(model, tokenizer, prompt, device=device)
+        result = generate_text(model, tokenizer, prompt, max_length=30, temperature=0.8, top_k=50, device=device)
         print(f"Generated: {result}")
