@@ -30,9 +30,10 @@ final_model.pth
 
 # Training artifacts
 *.pkl
+!tokenizer.pkl  # Allow tokenizer.pkl to be committed
 *.json
 training_metrics.json
-tokenizer.pkl
+# tokenizer.pkl  # Allow tokenizer.pkl to be committed
 
 # IDE
 .vscode/
