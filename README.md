@@ -142,18 +142,46 @@ small_llm_project/
 
 ## 🚀 Quick Start
 
-### **Prerequisites:**
+### **Step 1: Clone Repository**
 ```bash
-pip install torch transformers datasets accelerate
+git clone https://github.com/AnshulBari/Vaani.git
+cd Vaani/small_llm_project
 ```
 
-### **Running Local Inference:**
+### **Step 2: Install Dependencies**
 ```bash
-# Ensure you have the model files:
-# - final_model.pth
-# - tokenizer.pkl
+pip install torch>=2.0.0 numpy>=1.21.0 tqdm>=4.62.0
+# Or install all dependencies
+pip install -r requirements.txt
+```
 
-python local_inference.py
+### **Step 3: Download Pre-trained Model**
+
+#### Option A: Automatic Download (Recommended)
+```bash
+python download_model.py
+```
+
+#### Option B: Manual Download
+1. Go to [Releases](https://github.com/AnshulBari/Vaani/releases/tag/v1.1.0)
+2. Download these files:
+   - `model.pth` (1.63 GB) - Trained model weights
+   - `tokenizer.pkl` (~1 MB) - Tokenizer vocabulary
+   - `config.json` (~1 KB) - Model configuration
+
+#### Option C: Train Your Own Model
+```bash
+python train.py  # Train from scratch (requires training data)
+```
+
+### **Step 4: Verify Setup**
+```bash
+python analyze_model.py  # Check model specifications
+```
+
+### **Step 5: Run Inference**
+```bash
+python test_local_model.py  # Interactive model testing
 ```
 
 ### **Example Usage:**
