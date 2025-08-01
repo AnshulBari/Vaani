@@ -4,33 +4,34 @@ A custom-trained transformer-based language model built from scratch using PyTor
 
 ## 🎯 Project Overview
 
-Vaani is a 217-million parameter transformer model trained to understand and generate natural language text. This project showcases the end-to-end process of building an LLM from architecture design to local deployment.
+Vaani is a 427-million parameter transformer model trained to understand and generate natural language text. This project showcases the end-to-end process of building an LLM from architecture design to local deployment.
 
 ## 🏗️ Model Architecture
 
 ### **Core Specifications:**
 - **Model Type**: Transformer-based decoder language model
-- **Parameters**: 216,836,096 (≈ 217 million parameters)
-- **Model Size**: 0.81 GB (FP32 precision)
-- **Architecture**: Custom SmallLLM implementation
+- **Parameters**: 427,442,560 (≈ 427.4 million parameters)
+- **Model Size**: 1.63 GB (FP32 precision)
+- **Architecture**: Custom SmallLLM implementation with RoPE and pre-norm
 
 ### **Model Dimensions:**
 ```python
-vocab_size = 15000      # Vocabulary capacity
-d_model = 1024          # Hidden dimension
+vocab_size = 16000      # Vocabulary capacity
+d_model = 1408          # Hidden dimension
 n_layers = 16           # Number of transformer layers
-n_heads = 16            # Number of attention heads
-d_ff = 4096            # Feed-forward dimension
-max_seq_len = 512      # Maximum sequence length
+n_heads = 11            # Number of attention heads
+d_ff = 5632            # Feed-forward dimension
+max_seq_len = 1024     # Maximum sequence length
 dropout = 0.1          # Dropout rate
 ```
 
 ### **Key Components:**
-- **Token Embedding**: Maps tokens to 1024-dimensional vectors
+- **Token Embedding**: Maps tokens to 1408-dimensional vectors
 - **Rotary Positional Encoding**: Advanced position encoding for better sequence understanding
-- **Multi-Head Attention**: 16 attention heads for parallel processing
-- **Feed-Forward Networks**: 4096-dimensional intermediate layers
-- **Layer Normalization**: Stabilizes training across 16 layers
+- **Multi-Head Attention**: 11 attention heads for parallel processing
+- **Feed-Forward Networks**: 5632-dimensional intermediate layers
+- **Layer Normalization**: Pre-norm architecture stabilizing training across 16 layers
+- **Weight Tying**: Embedding and output layer weights are shared for efficiency
 
 ## 📊 Training Characteristics
 
@@ -39,9 +40,10 @@ dropout = 0.1          # Dropout rate
 - **Actual Vocabulary**: 262 unique tokens
 - **Training Epochs**: 3 epochs
 - **Total Steps**: 56 training steps
-- **Batch Size**: 4
-- **Gradient Accumulation**: 8 steps
-- **Learning Rate**: 0.0003 with warmup
+- **Batch Size**: 1
+- **Gradient Accumulation**: 4 steps
+- **Effective Batch Size**: 4 (1 × 4 accumulation)
+- **Learning Rate**: 0.0002
 - **Final Loss**: 0.3113
 
 ### **Training Progress:**
@@ -62,7 +64,7 @@ dropout = 0.1          # Dropout rate
 ### **Current Limitations:**
 - ❌ **Small Vocabulary**: Only 262 words (many words become `<unk>`)
 - ❌ **Limited Training**: Only 600 samples, narrow knowledge base
-- ❌ **Short Context**: 512 token maximum context length
+- ❌ **Medium Context**: 1024 token maximum context length
 - ❌ **Simple Responses**: Generates basic, sometimes repetitive text
 - ❌ **No Task Fine-tuning**: Not optimized for specific tasks or chat
 
@@ -169,9 +171,10 @@ Generated: the future of <unk> . . . .
 ### **Model Comparison:**
 | Model | Parameters | Size | Context Length |
 |-------|------------|------|----------------|
-| Vaani LLM | 217M | 0.81 GB | 512 tokens |
+| Vaani LLM | 427.4M | 1.63 GB | 1024 tokens |
 | GPT-2 Small | 124M | 0.5 GB | 1024 tokens |
 | GPT-2 Medium | 355M | 1.4 GB | 1024 tokens |
+| GPT-2 Large | 774M | 3.0 GB | 1024 tokens |
 
 ### **Training Efficiency:**
 - **Training Time**: ~7 minutes on GPU
@@ -251,16 +254,16 @@ The model was trained successfully on Google Colab with the following results:
 
 ```
 === Training Configuration ===
-vocab_size: 15000
-d_model: 1024
+vocab_size: 16000
+d_model: 1408
 n_layers: 16
-n_heads: 16
-d_ff: 4096
-max_seq_len: 512
+n_heads: 11
+d_ff: 5632
+max_seq_len: 1024
 dropout: 0.1
-batch_size: 4
-gradient_accumulation_steps: 8
-learning_rate: 0.0003
+batch_size: 1
+gradient_accumulation_steps: 4
+learning_rate: 0.0002
 weight_decay: 0.01
 epochs: 3
 warmup_ratio: 0.1
@@ -274,8 +277,8 @@ Processing texts into training sequences...
 Created 600 training sequences
 
 === Model Information ===
-Total parameters: 216,836,096
-Estimated model size: 0.81 GB (FP32)
+Total parameters: 427,442,560
+Estimated model size: 1.63 GB (FP32)
 Model device: cuda
 ==============================
 Total training steps: 56
